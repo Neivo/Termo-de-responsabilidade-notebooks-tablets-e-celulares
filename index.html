@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emissão de Termo de Responsabilidade</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 10;
+            padding: 0;
+            width: 21.6cm; /* Largura da folha ofício */
+            height: 40cm; /* Altura da folha ofício */
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+            border: 1px solid black; /* Adiciona borda para facilitar visualização */
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        form {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        hr {
+            margin-top: 40px;
+            margin-bottom: 40px;
+        }
+
+        #termoResponsabilidade {
+            margin: 0 auto; /* Centralizar */
+            padding: 20px;
+            border: 1px solid #d2baba;
+            border-radius: 5px;
+            text-align: justify; /* Justifica o texto */
+            width: 80%; /* Define a largura do conteúdo */
+        }
+
+        #termoResponsabilidade h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #termoResponsabilidade p {
+            margin-bottom: 10px;
+        }
+
+        .destaque {
+            background-color: #ffff00;
+            font-weight: bold;
+        }
+
+        .assinatura {
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        .linhaAssinatura {
+            width: 200px;
+            border-top: 1px solid #000;
+            margin: 20px auto;
+        }
+        #logo {
+            max-width: 300px; /* Ajuste conforme necessário */
+            margin-bottom: 20px;
+            display: block; /* Para centralizar */
+            margin-left: auto; /* Para centralizar */
+            margin-right: auto; /* Para centralizar */
+        }
+
+        @media only screen and (max-width: 600px) {
+            form {
+                max-width: 100%;
+            }
+            #termoResponsabilidade {
+                width: 100%;
+            }
+            #logo {
+                max-width: 80%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Emissão de Termo de Responsabilidade</h1>
+    <img id="logo" src="./imagens/Marca_FIESC Fachadas.png" alt="Logo da Empresa">
+    <form id="termForm">
+        <label for="nome">Nome do Colaborador:</label>
+        <input type="text" id="nome" required><br>
+        
+        <label for="cpf">CPF:</label>
+        <input type="text" id="cpf" required oninput="formatarCPF(this)">
+
+        <label for="entidade">Entidade do item:</label>
+        <select id="entidade" required>
+            <option value="SESI">SESI</option>
+            <option value="SENAI">SENAI</option>
+            <option value="FIESC">FIESC</option>
+            <option value="IEL">IEL</option>
+        </select><br><br>
+        
+        <label for="item">Nome do Item:</label>
+        <input type="text" id="item" required><br><br>
+        
+        <label for="plaqueta">Número da Plaqueta:</label>
+        <input type="text" id="plaqueta" required><br><br>
+        
+        <!-- Campo de texto para inserir o nome da filial -->
+        <label for="filial">Filial:</label>
+        <input type="text" id="filial" required><br><br>
+        
+        <button type="button" onclick="validarCampos()">Gerar Termo de Responsabilidade</button>
+    </form>
+
+    <hr>
+
+    <div id="termoResponsabilidade"></div>
+
+    <div id="assinatura" class="assinatura">
+        <p>___________________________</p>
+        <p>Assinatura do Colaborador</p>
+    </div>
+
+    <button id="btnGerarPDF" onclick="gerarPDF()">Gerar PDF</button>
+
+    <script>
+        function formatarCPF(campo) {
+            var cpf = campo.value.replace(/\D/g, '');
+            if (cpf.length > 3 && cpf.length <= 6) {
+                cpf = cpf.substring(0, 3) + '.' + cpf.substring(3);
+            } else if (cpf.length > 6 && cpf.length <= 9) {
+                cpf = cpf.substring(0, 3) + '.' + cpf.substring(3, 6) + '.' + cpf.substring(6);
+            } else if (cpf.length > 9 && cpf.length <= 11) {
+                cpf = cpf.substring(0, 3) + '.' + cpf.substring(3, 6) + '.' + cpf.substring(6, 9) + '-' + cpf.substring(9);
+            }
+            campo.value = cpf;
+        }
+
+        function validarCampos() {
+            var nome = document.getElementById('nome').value;
+            var cpf = document.getElementById('cpf').value;
+            var entidade = document.getElementById('entidade').value;
+            var item = document.getElementById('item').value;
+            var plaqueta = document.getElementById('plaqueta').value;
+            var filial = document.getElementById('filial').value;
+
+            if (!nome || !cpf || !entidade || !item || !plaqueta || !filial) {
+                alert("Todos os campos são obrigatórios.");
+                return;
+            }
+
+            gerarTermo();
+        }
+        
+        function gerarTermo() {
+            var nome = document.getElementById('nome').value;
+            var cpf = document.getElementById('cpf').value;
+            var entidade = document.getElementById('entidade').value;
+            var item = document.getElementById('item').value;
+            var plaqueta = document.getElementById('plaqueta').value;
+            var filial = document.getElementById('filial').value;
+
+            var dataAtual = new Date().toLocaleDateString();
+
+            var termo = `
+                <h2>Termo de Responsabilidade item FIESC</h2>
+                <p>Por meio deste termo, eu, <span class="destaque">${nome}</span>, CPF <span class="destaque">${cpf}</span>, me responsabilizo pela guarda e conservação do bem ${item} com a plaqueta número <span class="destaque">${plaqueta}</span>, identificado acima, na filial <span class="destaque">${filial}</span>, para a entidade <span class="destaque">${entidade}</span>. Estou ciente de que devo utilizá-lo exclusivamente para fins de trabalho, respeitando as diretrizes da Política de Segurança da Informação ${entidade}. Assumo total responsabilidade por qualquer extravio ou dano causado por uma utilização indevida do bem, isentando o Sistema ${entidade} de qualquer ônus relacionado.</p>
+                <p>Tenho plena consciência de que este termo de responsabilidade permanecerá em vigor por tempo indeterminado. Portanto, comprometo-me a informar imediatamente a equipe de patrimônio, por meio da abertura de chamado, caso ocorra qualquer mudança de área ou responsabilidade. Por fim, assumo o compromisso de devolver o equipamento descrito acima, nas mesmas condições em que o recebi, considerando apenas o desgaste natural decorrente do uso regular.</p>
+                <p>Em caso de furto ou roubo do bem, comprometo-me a registrar imediatamente um boletim de ocorrência e abrir um chamado para iniciar o processo administrativo.</p>
+                <p>Data: ${dataAtual}</p>
+            `;
+
+            document.getElementById('termoResponsabilidade').innerHTML = termo;
+        }
+
+        function gerarPDF() {
+            var nome = document.getElementById('nome').value;
+            var cpf = document.getElementById('cpf').value;
+            var entidade = document.getElementById('entidade').value;
+            var plaqueta = document.getElementById('plaqueta').value;
+            var filial = document.getElementById('filial').value;
+        
+            var termoResponsabilidade = document.getElementById('termoResponsabilidade').innerHTML;
+            var doc = new jsPDF();
+            doc.fromHTML(termoResponsabilidade, 15, 15, {
+                width: 170 // Largura do conteúdo do PDF
+            });
+            
+            // Adiciona linha para assinatura
+            doc.line(40, 255, 170, 255);
+            
+            // Adiciona informações de nome e CPF do colaborador
+            doc.text(`Nome: ${nome}`, 40, 265);
+            doc.text(`CPF: ${cpf}`, 40, 272);
+            
+            // Obter a data atual
+            var dataAtual = new Date().toLocaleDateString().replace(/\//g, '_');
+            // Define o nome do arquivo com a data do termo, entidade, plaqueta, nome e CPF
+            var nomeArquivo = `termo_responsabilidade_${dataAtual}_${entidade}_${plaqueta}_${nome}_${cpf}.pdf`;
+            // Baixa o arquivo PDF com o nome definido
+            doc.save(nomeArquivo);
+        }
+    </script>
+</body>
+</html>
